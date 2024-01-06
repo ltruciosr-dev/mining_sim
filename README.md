@@ -9,6 +9,7 @@ Here we can find the code for the Astay - Mining Simulation, all of this functio
 - [CMake](https://cmake.org/download/) - 3.28.1
 - [Boost](https://www.boost.org/doc/libs/1_84_0/tools/build/doc/html/index.html#bbv2.installation) - 1.81.0
 - [rapidcsv](https://github.com/d99kris/rapidcsv) - 8.80
+- [ApacheArrow](https://github.com/apache/arrow/tree/main/cpp)
 - [SQLiteCpp](https://github.com/SRombauts/SQLiteCpp) - 3.3.1
 - [sqlite3](https://www.linuxcapable.com/install-sqlite-on-fedora-linux/) - 3.42.0
 - [gtest](https://gist.github.com/Cartexius/4c437c084d6e388288201aadf9c8cdd5) - 1.13.0
@@ -52,6 +53,20 @@ sudo dnf install libsqlite3x-devel
 ```
 The second command is needed to download the `sqlite3.h` file.
 
+### Install Arrow Parquet
+
+Arrow parquet should be compiled for fedora, it doesn't support fedora 39 by default.
+```
+git clone https://github.com/apache/arrow.git
+cd arrow/cpp
+cmake .. -DARROW_PARQUET=ON \
+      -DPARQUET_BUILD_EXECUTABLES=ON \
+      -DARROW_WITH_SNAPPY=ON
+make parquet -j8
+sudo make install
+sudo ldconfig /usr/local/lib64
+```
+
 ### Install gtest
 
 Gtest can be directly downloaded from fedora repo.
@@ -59,7 +74,7 @@ Gtest can be directly downloaded from fedora repo.
 sudo dnf install gtest
 sudo dnf install gtest-devel
 ```
-The second command is needed to download the `sqlite3.h` file.
+The second command is needed to download the `gtest.h` file.
 
 # Compilation
 
@@ -67,6 +82,7 @@ Let's follow the next pipeline:
 
 ---
 **NOTE**
+
 It's recommended to compile whit -j2 as argument, however you are able to define x up to your number of cores
 
 ---
