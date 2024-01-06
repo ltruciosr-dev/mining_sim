@@ -1,3 +1,6 @@
+# vscode
+.vscode/
+
 # C++ Linux
 bin/
 build/
