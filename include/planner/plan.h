@@ -11,7 +11,7 @@ class MiningPlan
 {
 private:
     typedef double float_t;
-    float_t x_offset_, y_offset_;
+    float_t xOffset_, yOffset_;
     std::vector<float_t> x_, y_;
     std::vector<float_t> levels_;
     std::vector<std::string> loaders_;
@@ -28,8 +28,8 @@ public:
     }
     void add_offset(float_t x_offset, float_t y_offset)
     {
-        x_offset_ = x_offset;
-        y_offset_ = y_offset;
+        xOffset_ = x_offset;
+        yOffset_ = y_offset;
     }
     const std::vector<float_t> &x() const
     {
