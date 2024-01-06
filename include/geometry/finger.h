@@ -18,7 +18,7 @@ namespace astay
         typedef bg::model::polygon<point_xy> polygon_t;
         MiningCut cut_;
         std::vector<MiningBlock> blocks_;
-        std::vector<MiningOre> ores_;
+        std::vector<MiningGeoPoly> ores_;
         std::vector<MiningSlice> slices_;
         std::vector<MiningVoid> void_ores_;
         int extraction_day_;
@@ -33,7 +33,7 @@ namespace astay
         {
             extraction_day_ = extraction_day;
         }
-        void set_id(int id)
+        void setId(int id)
         {
             id_ = id;
         }
@@ -41,7 +41,7 @@ namespace astay
         {
             blocks_ = blocks;
         }
-        void AddOre(MiningOre ore)
+        void AddOre(MiningGeoPoly ore)
         {
             ores_.push_back(ore);
         }
@@ -49,7 +49,7 @@ namespace astay
         {
             slices_.push_back(slice);
         }
-        bool ContainsOre(MiningOre ore)
+        bool ContainsOre(MiningGeoPoly ore)
         {
             if (bg::intersects(cut_.box(), ore.box()))
             {
@@ -91,7 +91,7 @@ namespace astay
         {
             return blocks_;
         }
-        const std::vector<MiningOre> &ores() const
+        const std::vector<MiningGeoPoly> &ores() const
         {
             return ores_;
         }
@@ -133,7 +133,7 @@ namespace astay
                 slice.add(rslices_lower);
                 slice.add(rslices_upper);
                 slice.add(lslices_upper);
-                slice.compute_box();
+                slice.computeBox();
                 slice.correct();
                 slices_.push_back(slice);
                 // Update

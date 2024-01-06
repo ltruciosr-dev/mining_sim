@@ -76,7 +76,7 @@ namespace astay
                 break;
             }
         }
-        void AddOre(const MiningOre &ore, bool status = false)
+        void AddOre(const MiningGeoPoly &ore, bool status = false)
         {
             mapper_.add(ore.geometry());
             if (status)
@@ -126,7 +126,7 @@ namespace astay
         {
             for (const MiningBlock &block : finger.blocks())
                 AddBlock(block);
-            for (const MiningOre &ore : finger.ores())
+            for (const MiningGeoPoly &ore : finger.ores())
                 AddOre(ore);
             for (const MiningSlice &slice : finger.slices())
                 AddSlice(slice);
@@ -152,12 +152,12 @@ namespace astay
             }
             for (const auto &finger : fingers)
             {
-                for (const MiningOre &ore : finger.ores())
+                for (const MiningGeoPoly &ore : finger.ores())
                     AddOre(ore);
             }
             for (const auto &finger : fingers)
             {
-                AddCut(finger.cut(), finger.cut().extraction_day());
+                AddCut(finger.cut(), finger.cut().extractionDay());
             }
         }
     };

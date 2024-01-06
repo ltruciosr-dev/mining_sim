@@ -29,11 +29,11 @@ namespace astay
             bg::set<bg::max_corner, 0>(geometry_, p_max.x());
             bg::set<bg::max_corner, 1>(geometry_, p_max.y());
         }
-        void set_id(int id)
+        void setId(int id)
         {
             id_ = id;
         }
-        void set_level(int level)
+        void setLevel(int level)
         {
             level_ = level;
         }

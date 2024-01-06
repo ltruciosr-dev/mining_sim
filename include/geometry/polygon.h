@@ -19,18 +19,22 @@ namespace astay
         typedef bg::model::box<point_xy> box_t;
         polygon_t geometry_;
         box_t box_;
-        int level_;
+        int level_, id_;
 
     public:
         void add(const point_xy &p)
         {
             bg::append(geometry_, p);
         }
-        void set_level(int level)
+        void setLevel(int level)
         {
             level_ = level;
         }
-        void compute_box()
+        void setId(int id)
+        {
+            id_ = id;
+        }
+        void computeBox()
         {
             // Initialize box vertices
             float_t min_x(FLT_MAX), min_y(FLT_MAX), max_x(-FLT_MAX), max_y(-FLT_MAX);
@@ -55,6 +59,15 @@ namespace astay
             bg::set<bg::max_corner, 0>(box_, max_x);
             bg::set<bg::max_corner, 1>(box_, max_y);
         }
+        void correct()
+        {
+            bg::correct(geometry_);
+        }
+        void clear()
+        {
+            bg::clear(geometry_);
+            bg::clear(box_);
+        }
         const box_t &box() const
         {
             return box_;
@@ -63,15 +76,19 @@ namespace astay
         {
             return geometry_;
         }
-        const int level() const
+        int level() const
         {
             return level_;
         }
-        void correct()
+        int id() const
         {
-            bg::correct(geometry_);
+            return id_;
         }
-        bool ContainsPolygon(const polygon_t &geometry)
+        int size() const
+        {
+            return bg::num_points(geometry_);
+        }
+        bool containsPolygon(const polygon_t &geometry)
         {
             if (bg::intersects(geometry_, geometry))
             {
@@ -79,7 +96,7 @@ namespace astay
             }
             return false;
         }
-        bool ContainsBlock(const MiningBlock &block)
+        bool containsBlock(const MiningBlock &block)
         {
             if (bg::intersects(geometry_, block.geometry()))
             {
@@ -87,20 +104,11 @@ namespace astay
             }
             return false;
         }
-        int size() const
-        {
-            return bg::num_points(geometry_);
-        }
-        void clear()
-        {
-            bg::clear(geometry_);
-            bg::clear(box_);
-        }
         friend std::ostream &operator<<(std::ostream &o, const Polygon &poly)
         {
             return o << bg::dsv(poly.box_) << " | level(" << poly.level_ << ")";
         }
-        static box_t GetBoxFromPolygon(const polygon_t &polygon)
+        static box_t getBoxFromPolygon(const polygon_t &polygon)
         {
             box_t box;
             float_t min_x(FLT_MAX), min_y(FLT_MAX), max_x(-FLT_MAX), max_y(-FLT_MAX);
@@ -132,51 +140,43 @@ namespace astay
     private:
         std::string name_;
         int extraction_day_;
-        int id_;
 
     public:
-        void set_name(std::string &name)
+        void setName(std::string &name)
         {
             name_ = name;
         }
-        void set_extraction_day(int extraction_day)
+        void setExtractionDay(int extraction_day)
         {
             extraction_day_ = extraction_day;
-        }
-        void set_id(int id)
-        {
-            id_ = id;
         }
         std::string name() const
         {
             return name_;
         }
-        int extraction_day() const
+        int extractionDay() const
         {
             return extraction_day_;
         }
-        int id() const
-        {
-            return id_;
-        }
         friend std::ostream &operator<<(std::ostream &o, const MiningCut &poly)
         {
-            return o << "vertices (" << bg::num_points(poly.geometry_) << ") | level (" << poly.level_ << ")";
+            return o << "Mining Cut - ID (" << poly.id() << ") :\tVertices (" << bg::num_points(poly.geometry()) 
+                     << ")\t| Level (" << poly.level() << ") | Day (" << poly.extractionDay() << ")";
         }
     };
 
-    class MiningOre : public Polygon
+    class MiningGeoPoly : public Polygon
     {
     private:
         std::string name_ = "NN";
         bool status_ = false;
 
     public:
-        void set_name(std::string &name)
+        void setName(std::string &name)
         {
             name_ = name;
         }
-        void set_status(bool status)
+        void setStatus(bool status)
         {
             status_ = status;
         }
@@ -195,7 +195,7 @@ namespace astay
             name_ = "NN";
             status_ = false;
         }
-        friend std::ostream &operator<<(std::ostream &o, const MiningOre &ore)
+        friend std::ostream &operator<<(std::ostream &o, const MiningGeoPoly &ore)
         {
             return o << "[" << ore.name_ << "] | " << bg::dsv(ore.box_) << " | level(" << ore.level_ << ")";
         }
@@ -207,8 +207,8 @@ namespace astay
         void set_geometry(polygon_t geometry, float_t level)
         {
             geometry_ = geometry;
-            compute_box();
-            set_level(level);
+            computeBox();
+            setLevel(level);
             correct();
         }
         friend std::ostream &operator<<(std::ostream &o, const MiningVoid &ore)

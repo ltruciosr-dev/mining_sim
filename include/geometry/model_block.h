@@ -80,9 +80,9 @@ namespace astay
                     point_xy p_min{block_xmin, block_ymin};
                     point_xy p_max{block_xmin + block_size_, block_ymin + block_size_};
                     block.corners(p_min, p_max);
-                    if (cut.ContainsBlock(block))
+                    if (cut.containsBlock(block))
                     {
-                        block.set_id(id);
+                        block.setId(id);
                         block.correct();
 
                         // SQLite Interaction
@@ -96,7 +96,7 @@ namespace astay
                             cu = query.getColumn(2).getDouble();
                             ore_type = query.getColumn(3).getString();
                         }
-                        block.set_level(poly_level);
+                        block.setLevel(poly_level);
                         block.set_density(density);
                         block.set_volume(volume);
                         block.set_cu(cu);
