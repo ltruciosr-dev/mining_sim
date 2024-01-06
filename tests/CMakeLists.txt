@@ -1,17 +1,25 @@
-# add_subdirectory(/usr/lib/
-#     ${PROJECT_BINARY_DIR}/gtest)
 include(CTest) # Include testing cmake package.
 set(TEST_BINARY ${PROJECT_NAME}_test)
 
 
 add_executable(${TEST_BINARY} 
     test_init.cpp
-    # test_sort.cpp
-    test_mining.cpp
+    test_release1.cpp
+    # test_sqlite_duckdb.cpp
+    # test_sqlite_sqlitecpp.cpp
+    # test_parquet_arrow.cpp
+    # test_parquet_duckdb.cpp
 )
 
 target_link_libraries(${TEST_BINARY}
-    gtest gtest_main SQLiteCpp sqlite3 pthread kaz_tools kaz_sort) 
+    gtest
+    gtest_main
+    SQLiteCpp
+    sqlite3
+    duckdb
+    pthread
+    mining_sim
+    ) 
 
 add_test(
     NAME ${TEST_BINARY}

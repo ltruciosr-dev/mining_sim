@@ -1,5 +1,8 @@
-add_library(kaz_tools STATIC kaz_mining.cpp)
-add_library(kaz_sort STATIC kaz_sort.cpp)
+add_library(mining_sim STATIC mining_sim.cpp)
 
-target_link_libraries (kaz_tools ${SQLite3_LIBRARIES})
-target_link_libraries (kaz_sort ${SQLite3_LIBRARIES})
+target_link_libraries (mining_sim 
+    SQLiteCpp
+    sqlite3
+    pthread
+    duckdb
+    )
