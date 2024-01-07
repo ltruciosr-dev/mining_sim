@@ -1,104 +1,97 @@
 #pragma once
 
-#include <boost/geometry/geometries/point_xy.hpp>
-#include <boost/geometry/geometries/box.hpp>
+#include "geometry/polygon.h"
 
 namespace bg = boost::geometry;
 
 namespace astay
 {
-    class MiningBlock
+    class MiningBlock : public Polygon
     {
     private:
-        typedef double float_t;
-        typedef bg::model::d2::point_xy<float_t> point_xy;
-        typedef bg::model::box<point_xy> box_t;
-        box_t geometry_;
-        int id_ = -1;
-        int level_ = -1;
-        float_t volume_ = -1;
-        float_t density_ = -1;
-        float_t cu_ = -1;
-        std::string ore_type_;
+        int type_{-1};
+        float_t topo_{-1}, density_{-1};
+        float_t au_{-1}, ag_{-1}, cu_{-1};
+        float_t tcm_{-1}, s_{-1};
 
     public:
-        void corners(const point_xy &p_min, const point_xy &p_max)
+        void setType(int type)
         {
-            bg::set<bg::min_corner, 0>(geometry_, p_min.x());
-            bg::set<bg::min_corner, 1>(geometry_, p_min.y());
-            bg::set<bg::max_corner, 0>(geometry_, p_max.x());
-            bg::set<bg::max_corner, 1>(geometry_, p_max.y());
+            type_ = type;
         }
-        void setId(int id)
+        void setTopo(float_t topo)
         {
-            id_ = id;
+            topo_ = topo;
         }
-        void setLevel(int level)
-        {
-            level_ = level;
-        }
-        void set_volume(float_t volume)
-        {
-            volume_ = volume;
-        }
-        void set_density(float_t density)
+        void setDensity(float_t density)
         {
             density_ = density;
         }
-        void set_cu(float_t cu)
+        void setAu(float_t au)
+        {
+            au_ = au;
+        }
+        void setAg(float_t ag)
+        {
+            ag_ = ag;
+        }
+        void setCu(float_t cu)
         {
             cu_ = cu;
         }
-        void set_ore_type(std::string ore_type)
+        void setTcm(float_t tcm)
         {
-            ore_type_ = ore_type;
+            tcm_ = tcm;
         }
-        void clear()
+        void setS(float_t s)
         {
-            bg::clear(geometry_);
-            volume_ = -1;
-            density_ = -1;
-            cu_ = -1;
+            s_ = s;
         }
-        int id() const
+        int type() const
         {
-            return id_;
+            return type_;
         }
-        int level() const
+        float_t topo() const
         {
-            return level_;
-        }
-        float_t volume() const
-        {
-            return volume_;
+            return topo_;
         }
         float_t density() const
         {
             return density_;
         }
+        float_t au() const
+        {
+            return au_;
+        }
+        float_t ag() const
+        {
+            return ag_;
+        }
         float_t cu() const
         {
             return cu_;
         }
-        std::string ore_type() const
+        float_t tcm() const
         {
-            return ore_type_;
+            return tcm_;
         }
-        const box_t &geometry() const
+        float_t s() const
         {
-            return geometry_;
+            return s_;
         }
-        void correct()
-        {
-            bg::correct(geometry_);
-        }
-
         friend std::ostream &operator<<(std::ostream &o, const MiningBlock &block)
         {
             return o << "[" << block.id_ << "] | " << bg::dsv(block.geometry_)
-                     << " | vol:" << block.volume_
+                     << " | TOPO%:" << block.topo_
                      << ", cu:" << block.cu_
                      << ", density:" << block.density_;
         }
     };
+
+    class SliderBlock : public Polygon
+    {
+    private:
+    public:
+    
+    }
 }
