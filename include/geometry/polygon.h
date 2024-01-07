@@ -36,28 +36,24 @@ namespace astay
         }
         void computeBox()
         {
-            // Initialize box vertices
-            float_t min_x(FLT_MAX), min_y(FLT_MAX), max_x(-FLT_MAX), max_y(-FLT_MAX);
-
+            float_t x_min{DBL_MAX}, y_min{DBL_MAX};
+            float_t x_max{-DBL_MAX}, y_max{-DBL_MAX};
+        
+            // Iterate through vertex to find the extreme coordinates
             for (auto it = boost::begin(bg::exterior_ring(geometry_)); it != boost::end(bg::exterior_ring(geometry_)); ++it)
             {
                 float_t x = bg::get<0>(*it);
                 float_t y = bg::get<1>(*it);
-                // define x
-                if (x < min_x)
-                    min_x = x;
-                else if (x > max_x)
-                    max_x = x;
-                // define y
-                if (y < min_y)
-                    min_y = y;
-                else if (y > max_y)
-                    max_y = y;
+                // Update the overall min and max coordinates
+                x_min = std::min(x, x_min);
+                y_min = std::min(y, y_min);
+                x_max = std::max(x, x_max);
+                y_max = std::max(y, y_max);
             }
-            bg::set<bg::min_corner, 0>(box_, min_x);
-            bg::set<bg::min_corner, 1>(box_, min_y);
-            bg::set<bg::max_corner, 0>(box_, max_x);
-            bg::set<bg::max_corner, 1>(box_, max_y);
+            bg::set<bg::min_corner, 0>(box_, x_min);
+            bg::set<bg::min_corner, 1>(box_, y_min);
+            bg::set<bg::max_corner, 0>(box_, x_max);
+            bg::set<bg::max_corner, 1>(box_, y_max);
         }
         void correct()
         {
@@ -95,43 +91,6 @@ namespace astay
                 return true;
             }
             return false;
-        }
-        bool containsBlock(const MiningBlock &block)
-        {
-            if (bg::intersects(geometry_, block.geometry()))
-            {
-                return true;
-            }
-            return false;
-        }
-        friend std::ostream &operator<<(std::ostream &o, const Polygon &poly)
-        {
-            return o << bg::dsv(poly.box_) << " | level(" << poly.level_ << ")";
-        }
-        static box_t getBoxFromPolygon(const polygon_t &polygon)
-        {
-            box_t box;
-            float_t min_x(FLT_MAX), min_y(FLT_MAX), max_x(-FLT_MAX), max_y(-FLT_MAX);
-            for (auto it = boost::begin(bg::exterior_ring(polygon)); it != boost::end(bg::exterior_ring(polygon)); ++it)
-            {
-                float_t x = bg::get<0>(*it);
-                float_t y = bg::get<1>(*it);
-                // define x
-                if (x < min_x)
-                    min_x = x;
-                else if (x > max_x)
-                    max_x = x;
-                // define y
-                if (y < min_y)
-                    min_y = y;
-                else if (y > max_y)
-                    max_y = y;
-            }
-            bg::set<bg::min_corner, 0>(box, min_x);
-            bg::set<bg::min_corner, 1>(box, min_y);
-            bg::set<bg::max_corner, 0>(box, max_x);
-            bg::set<bg::max_corner, 1>(box, max_y);
-            return box;
         }
     };
 
@@ -199,26 +158,5 @@ namespace astay
         {
             return o << "[" << ore.name_ << "] | " << bg::dsv(ore.box_) << " | level(" << ore.level_ << ")";
         }
-    };
-
-    class MiningVoid : public Polygon
-    {
-    public:
-        void set_geometry(polygon_t geometry, float_t level)
-        {
-            geometry_ = geometry;
-            computeBox();
-            setLevel(level);
-            correct();
-        }
-        friend std::ostream &operator<<(std::ostream &o, const MiningVoid &ore)
-        {
-            return o << "[void_cut] | " << bg::dsv(ore.box_) << " | level(" << ore.level_ << ")";
-        }
-    };
-
-    class MiningSlice : public Polygon
-    {
-    public:
     };
 }
