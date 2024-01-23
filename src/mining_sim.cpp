@@ -2,9 +2,10 @@
 #include <algorithm>
 #include <duckdb.hpp>
 #include "mining_sim.h"
-#include "geometry/polygon.h"
-#include "geometry/drawer.h"
-#include "SQLiteCpp/SQLiteCpp.h"
+// #include "geometry/polygon.h"
+// #include "geometry/block.h"
+// #include "geometry/drawer.h"
+// #include "SQLiteCpp/SQLiteCpp.h"
 
 
 namespace astay
@@ -253,47 +254,61 @@ namespace astay
         }
     }
 
-    void Datatwin::ReadMiningBlocks(bool is_verbose)
+    void Datatwin::ReadTopography(bool is_verbose)
     {
-        ModelBlock model_block_(modelblocks_db_);
-        model_block_.set_offset(xOffset_, yOffset_);
-        model_block_.read_setup();
-        std::set<int> blocks_id;
-        for (auto &cut : cuts_)
+        auto bounding_area = computeBoundingArea(1.5, is_verbose); // margin
+        std::string x_lower = std::to_string(xOffset_ + bg::get<bg::min_corner, 0>(bounding_area));
+        std::string x_upper = std::to_string(xOffset_ + bg::get<bg::max_corner, 0>(bounding_area));
+        std::string y_lower = std::to_string(yOffset_ + bg::get<bg::min_corner, 1>(bounding_area));
+        std::string y_upper = std::to_string(yOffset_ + bg::get<bg::max_corner, 1>(bounding_area));
+
+        // DuckDB object to connect with the parquet file.
+        duckdb::DuckDB db(nullptr);
+        duckdb::Connection con(db);
+
+        for (auto const &set : cut_id_by_level_)
         {
-            std::vector<MiningBlock> temp_blocks = model_block_.get_blocks(cut);
-            for (MiningBlock block : temp_blocks)
+            // Extract all the geopoly polygons that belongs to each level
+            int level = set.first;
+            std::string z_lower = std::to_string(level - mb_height_);
+            
+            // Design the query to get the polycurve points.
+            std::string query_filter = "z=" + z_lower + " AND x>" + x_lower + " AND x<" + x_upper + " AND y>" + y_lower + " AND y<" + y_upper;
+            std::string query = "SELECT x,y,z,vertice,geometry FROM read_parquet('" + tp_filepath_ + "') WHERE "+ query_filter;
+            std::cout << query << std::endl;
+
+            // Execute query and get the points.
+            auto result = con.Query(query);
+            auto count = result->RowCount();
+            std::cout << count << std::endl;
+            
+            // Iterate over the chunks
+            auto chunk = result->Fetch();
+            int ctr = 0;
+            while (chunk != nullptr)
             {
-                int id = block.id();
-                if (blocks_id.find(id) != blocks_id.end())
-                    continue;
-                else
-                {
-                    blocks_id.insert(id);
-                    blocks_by_level_[block.level()].push_back(block);
-                }
+                ctr += chunk->size();
+                chunk = result->Fetch();
             }
+            // Print the query if verbose mode is enabled
+            if (is_verbose)
+            {
+                std::cout << query << std::endl; 
+            }      
+
         }
     }
-    // void Datatwin::ReadTopography(bool is_verbose)
-    // {
-    //     auto bounding_area = Datatwin::computeBoundingArea(1.5); // margin
-    //     float_t x_lower = xOffset_ + bg::get<bg::min_corner, 0>(bounding_area);
-    //     float_t x_upper = xOffset_ + bg::get<bg::max_corner, 0>(bounding_area);
-    //     float_t y_lower = yOffset_ + bg::get<bg::min_corner, 1>(bounding_area);
-    //     float_t y_upper = yOffset_ + bg::get<bg::max_corner, 1>(bounding_area);
-    //     float_t z_lower = zLevel_ - 
 
-    //     duckdb::DuckDB db(nullptr);
-    //     duckdb::Connection con(db);
-
-    //     // SQL query to retrieve mining cuts data.
-    //     std::string query_filter = "z= " + zLevel_ + " AND x>" + x_lower + " AND x<" + x_upper + " AND"
-    //     std::string query = "SELECT x,y,z,vertice,geometry FROM read_parquet('" + tp_filepath_ + "') WHERE z=4060 AND x>";
-    
+    /*
+    void Datatwin::ReadMiningBlocks(bool is_verbose)
+    {
+        duckdb::DuckDB db(nullptr);
+        duckdb::Connection con(db);
         
-    // }
-
+        // SQL query to retrieve mining cuts data.
+        std::string query_cuts = "SELECT x,y,z,vertice,geometry FROM read_parquet('" + mb_filepath_ + "') WHERE z=4060";
+    }
+    */
     // Compute the bounding box encompassing all cuts with a margin.
     // The function calculates the outer area considering all cuts in each level,
     // expanding the area by a specified margin.
