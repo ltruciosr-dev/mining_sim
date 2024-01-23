@@ -4,7 +4,6 @@
 #include <boost/geometry/algorithms/assign.hpp>
 #include <boost/geometry/geometries/point_xy.hpp>
 #include <boost/geometry/geometries/polygon.hpp>
-#include "geometry/block.h"
 
 namespace bg = boost::geometry;
 
@@ -14,15 +13,15 @@ namespace astay
     {
     protected:
         typedef double float_t;
-        typedef bg::model::d2::point_xy<float_t> point_xy;
-        typedef bg::model::polygon<point_xy> polygon_t;
-        typedef bg::model::box<point_xy> box_t;
+        typedef bg::model::d2::point_xy<float_t> point_t;
+        typedef bg::model::polygon<point_t> polygon_t;
+        typedef bg::model::box<point_t> box_t;
         polygon_t geometry_;
         box_t box_;
-        int level_, id_;
+        int level_{-1}, id_{-1};
 
     public:
-        void add(const point_xy &p)
+        void add(const point_t &p)
         {
             bg::append(geometry_, p);
         }
@@ -97,8 +96,8 @@ namespace astay
     class MiningCut : public Polygon
     {
     private:
-        std::string name_;
-        int extraction_day_;
+        std::string name_{"NN"};
+        int extraction_day_{-1};
 
     public:
         void setName(std::string &name)
@@ -127,7 +126,7 @@ namespace astay
     class MiningGeoPoly : public Polygon
     {
     private:
-        std::string name_ = "NN";
+        std::string name_ {"NN"};
         bool status_ = false;
 
     public:
@@ -154,9 +153,9 @@ namespace astay
             name_ = "NN";
             status_ = false;
         }
-        friend std::ostream &operator<<(std::ostream &o, const MiningGeoPoly &ore)
+        friend std::ostream &operator<<(std::ostream &o, const MiningGeoPoly &geopoly)
         {
-            return o << "[" << ore.name_ << "] | " << bg::dsv(ore.box_) << " | level(" << ore.level_ << ")";
+            return o << "[" << geopoly.name_ << "] | " << bg::dsv(geopoly.box_) << " | Level (" << geopoly.level_ << ")";
         }
     };
 }
