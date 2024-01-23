@@ -91,7 +91,18 @@ namespace astay
     class SliderBlock : public Polygon
     {
     private:
+        int xi_{-1}, yi_{-1};
+
     public:
-    
-    }
+        void setIndex(int x, int y)
+        {
+            xi_ = x;
+            yi_ = y;
+        }
+        friend std::ostream &operator<<(std::ostream &o, const SliderBlock &block)
+        {
+            return o << "[" << block.id_ << "] | " << bg::dsv(block.geometry_)
+                     << " | index: (" << block.xi_<< ", " << block.yi_<< ")";
+        }
+    };
 }
