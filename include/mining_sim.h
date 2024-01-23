@@ -23,8 +23,9 @@
 #include "SQLiteCpp/Transaction.h"
 /* Libraries developed by our team */
 #include "geometry/polygon.h"
-#include "geometry/model_block.h"
+#include "geometry/block.h"
 #include "geometry/drawer.h"
+#include "geometry/polyline.h"
 #include "planner/plan.h"
 #include "mining_sim.h"
 
@@ -36,22 +37,25 @@ namespace astay
     {
     private:
         typedef double float_t;
-        typedef bg::model::d2::point_xy<float_t> point_xy;
-        typedef bg::model::polygon<point_xy> polygon_t;
-        typedef bg::model::box<point_xy> box_t;
+        typedef bg::model::d2::point_xy<float_t> point_t;
+        typedef bg::model::polygon<point_t> polygon_t;
+        typedef bg::model::box<point_t> box_t;
+        typedef bg::model::linestring<point_t> linestring_t;
         std::string db_filepath_;
         std::string mb_filepath_;
         std::string tp_filepath_;
-        // std::string svg_dir_;
+        std::string svg_dir_;
         float_t xOffset_, yOffset_;
-        float_t mb_height_;
+        int mb_height_{10};
         // MiningPlan plan_;
         // std::vector<int> row_ids_;
         // std::vector<int> row_cuts_;
         std::vector<MiningCut> cuts_;
+        std::vector<Polyline> polylines_;
         std::vector<MiningGeoPoly> geopolygons_;
         // std::vector<std::string> row_loaders_;
         std::unordered_map<int, std::vector<int>> cut_id_by_level_;
+        std::unordered_map<int, std::vector<int>> polyline_id_by_level_;
         std::unordered_map<int, std::vector<int>> geopoly_id_by_cut_id_;
         // std::unordered_map<int, std::vector<int>> geopoly_id_by_level_;
         // std::map<int, std::vector<MiningBlock>> blocks_by_level_;
@@ -65,23 +69,23 @@ namespace astay
         void setDBfilepath(const std::string &filepath);
         void setModelBlockfilepath(const std::string &filepath);
         void setTopographyfilepath(const std::string &filepath);
+        void setSVGDir(const std::string &filepath);
         // void setModelBlocksDB(const std::string &db_name);
-        // void setSVGDir(const std::string &svg_dir);
         /* Read data */
         void ReadMiningCuts(bool is_verbose = false);
         void ReadMiningGeoPolygons(bool is_verbose = false);
-        void ReadMiningBlocks(bool is_verbose = false);
-        // void ReadTopography(bool is_verbose = false);
+        void ReadTopography(bool is_verbose = false);
+        // void ReadMiningBlocks(bool is_verbose = false);
         // void ReadPlan(bool is_verbose = false);
         /* Compute operations */
+        void IntersectMiningCutsWithPolylines(bool is_verbose = false);
         // void SortCuts(bool is_verbose = false);
         // void ValidateDB(bool is_verbose = false);
         // void PopulateDB(bool is_verbose = false);
-        // void Draw(bool is_verbose = false);
-    
+        void Draw(bool is_verbose = false);
     private:
         template <class PolygonType>
-        PolygonType FixCoordinates(const PolygonType &polygon, point_xy &centroid)
+        PolygonType ApplyOffsetToPolygon(const PolygonType &polygon, point_t &centroid)
         {
             PolygonType out_polygon;
             polygon_t poly = polygon.geometry();
@@ -91,27 +95,27 @@ namespace astay
             {
                 float_t x = bg::get<0>(*it) - centroid.x();
                 float_t y = bg::get<1>(*it) - centroid.y();
-                point_xy p{x, y};
+                point_t p{x, y};
                 out_polygon.add(p);
             }
             out_polygon.correct();
             return out_polygon;
         }
-        MiningBlock FixCoordinates(const MiningBlock &block, point_xy &centroid)
+        Polyline ApplyOffsetToPolyline(const Polyline &polyline, point_t &centroid)
         {
-            MiningBlock block_moved;
-            float_t block_xmin = bg::get<bg::min_corner, 0>(block.geometry());
-            float_t block_ymin = bg::get<bg::min_corner, 1>(block.geometry());
-            float_t block_xmax = bg::get<bg::max_corner, 0>(block.geometry());
-            float_t block_ymax = bg::get<bg::max_corner, 1>(block.geometry());
-            point_xy p_min{block_xmin - centroid.x(), block_ymin - centroid.y()};
-            point_xy p_max{block_xmax - centroid.x(), block_ymax - centroid.y()};
-            block_moved.corners(p_min, p_max);
-            block_moved.setId(block.id());
-            block_moved.correct();
-            return block_moved;
+            Polyline out_polyline;
+            linestring_t linestring = polyline.linestring();
+            for (auto it = boost::begin(linestring); it != boost::end(linestring); ++it)
+            {
+                float_t x = bg::get<0>(*it) - centroid.x();
+                float_t y = bg::get<1>(*it) - centroid.y();
+                point_t p{x, y};
+                out_polyline.add(p);
+            }
+            return out_polyline;
         }
         void finalizeAndStoreCut(MiningCut& cut, int level, int day);
+        void finalizeAndStorePolyline(Polyline& polyline, int level);
         void finalizeAndStoreGeoPoly(MiningGeoPoly& geopoly, int level, std::string& name);
         box_t computeBoundingArea(float margin = 1.5, bool is_verbose = false);
     };

@@ -25,18 +25,22 @@ TEST(DATATWIN, RELEASE_1)
     datatwin.setDBfilepath(db_file);
     datatwin.setTopographyfilepath(topography_parquet_file);
     datatwin.setModelBlockfilepath(modelblock_parquet_file);
+    datatwin.setSVGDir(svg_dir);
     // datatwin.setModelBlocksDB(modelblocks_db);
-    // datatwin.setSVGDir(svg_dir);
-    // -- read
-    datatwin.ReadMiningCuts(true);
-    datatwin.ReadMiningGeoPolygons(true);
-    // datatwin.computeBoundingArea(1.5, true);
-    // datatwin.ReadBlocks(kDontVerbose);
+    
+    /* Read Mining Polygons and Topography */
+    datatwin.ReadMiningCuts(false);
+    datatwin.ReadTopography(false);
+    datatwin.ReadMiningGeoPolygons(false);
+    // datatwin.ReadMiningBlocks(false);
+    
+    /* Process Information */
+    datatwin.IntersectMiningCutsWithPolylines(true);
     // -- compute
     // datatwin.ComputeSlices(slice_dist, kShowVerbose);
     // datatwin.ComputeFingerIntersections(kDontVerbose);
     // -- draw
-    // datatwin.Draw(kShowVerbose);
+    datatwin.Draw(false);
 
     // Assert
     ASSERT_EQ(0, 0);
