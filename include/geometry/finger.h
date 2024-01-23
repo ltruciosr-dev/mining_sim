@@ -14,8 +14,8 @@ namespace astay
     {
     private:
         typedef double float_t;
-        typedef bg::model::d2::point_xy<float_t> point_xy;
-        typedef bg::model::polygon<point_xy> polygon_t;
+        typedef bg::model::d2::point_t<float_t> point_t;
+        typedef bg::model::polygon<point_t> polygon_t;
         MiningCut cut_;
         std::vector<MiningBlock> blocks_;
         std::vector<MiningGeoPoly> ores_;
@@ -103,30 +103,30 @@ namespace astay
         {
             return void_ores_;
         }
-        void ComputeSlices(float_t slice_dist, point_xy dir_vec)
+        void ComputeSlices(float_t slice_dist, point_t dir_vec)
         {
             // Get limits by given direction
-            point_xy ref_point{0, 0};
+            point_t ref_point{0, 0};
             auto limits = ComputeLimitsByDirection(dir_vec, ref_point);
             float_t u_min{limits[0]}, u_max{limits[1]};
             float_t v_min{limits[2]}, v_max{limits[3]};
 
             // Generate slices
             int n_slices = ceil((u_max - u_min) / slice_dist);
-            point_xy orth_vec{-bg::get<1>(dir_vec), bg::get<0>(dir_vec)}; // Orthogonal vector
-            point_xy lslices_base{bg::get<0>(ref_point) + u_min * bg::get<0>(dir_vec),
+            point_t orth_vec{-bg::get<1>(dir_vec), bg::get<0>(dir_vec)}; // Orthogonal vector
+            point_t lslices_base{bg::get<0>(ref_point) + u_min * bg::get<0>(dir_vec),
                                   bg::get<1>(ref_point) + u_min * bg::get<1>(dir_vec)};
-            point_xy lslices_lower{bg::get<0>(lslices_base) + v_min * bg::get<0>(orth_vec),
+            point_t lslices_lower{bg::get<0>(lslices_base) + v_min * bg::get<0>(orth_vec),
                                    bg::get<1>(lslices_base) + v_min * bg::get<1>(orth_vec)};
-            point_xy lslices_upper{bg::get<0>(lslices_base) + v_max * bg::get<0>(orth_vec),
+            point_t lslices_upper{bg::get<0>(lslices_base) + v_max * bg::get<0>(orth_vec),
                                    bg::get<1>(lslices_base) + v_max * bg::get<1>(orth_vec)};
 
             for (int i = 0; i < n_slices; i++)
             {
                 MiningSlice slice;
-                point_xy rslices_upper{bg::get<0>(lslices_upper) + slice_dist * bg::get<0>(dir_vec),
+                point_t rslices_upper{bg::get<0>(lslices_upper) + slice_dist * bg::get<0>(dir_vec),
                                        bg::get<1>(lslices_upper) + slice_dist * bg::get<1>(dir_vec)};
-                point_xy rslices_lower{bg::get<0>(lslices_lower) + slice_dist * bg::get<0>(dir_vec),
+                point_t rslices_lower{bg::get<0>(lslices_lower) + slice_dist * bg::get<0>(dir_vec),
                                        bg::get<1>(lslices_lower) + slice_dist * bg::get<1>(dir_vec)};
                 slice.add(lslices_upper);
                 slice.add(lslices_lower);
@@ -141,21 +141,21 @@ namespace astay
                 lslices_lower = rslices_lower;
             }
         }
-        std::array<float_t, 4> ComputeLimitsByDirection(point_xy &dir_vec, point_xy &ref_point) const
+        std::array<float_t, 4> ComputeLimitsByDirection(point_t &dir_vec, point_t &ref_point) const
         {
             float_t u_min{FLT_MAX}, u_max{-FLT_MAX}; // parallel to dir_vec
             float_t v_min{FLT_MAX}, v_max{-FLT_MAX}; // perpendicular to dir_vec
             // Init variables
             float_t u_ref = bg::get<0>(ref_point);
             float_t v_ref = bg::get<1>(ref_point);
-            point_xy orth_vec{-bg::get<1>(dir_vec), bg::get<0>(dir_vec)};
+            point_t orth_vec{-bg::get<1>(dir_vec), bg::get<0>(dir_vec)};
             
             // Identify the nearest and the farthest vertices with the provided direction.
             for (auto it = boost::begin(bg::exterior_ring(cut_.geometry())); it != boost::end(bg::exterior_ring(cut_.geometry())); ++it) // Iterator of polygon vertices
             {
                 float_t u = bg::get<0>(*it);
                 float_t v = bg::get<1>(*it);
-                point_xy vector{u - u_ref, v - v_ref};
+                point_t vector{u - u_ref, v - v_ref};
                 float_t u_dist = bg::dot_product(dir_vec, vector);
                 float_t v_dist = bg::dot_product(orth_vec, vector);
                 // Get 'u' limits

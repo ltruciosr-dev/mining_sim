@@ -14,7 +14,7 @@ namespace astay
     {
     private:
         typedef double float_t;
-        typedef bg::model::d2::point_xy<float_t> point_xy;
+        typedef bg::model::d2::point_t<float_t> point_t;
         SQLite::Database db_;
         float_t num_cells_x_, num_cells_y_, num_cells_z_;
         float_t orig_x_, orig_y_, orig_z_;
@@ -77,8 +77,8 @@ namespace astay
                     id = id_x + id_y + id_z; // ID to read SQL database
                     float_t block_xmin = orig_x_ + delta_x * block_size_;
                     float_t block_ymin = orig_y_ + delta_y * block_size_;
-                    point_xy p_min{block_xmin, block_ymin};
-                    point_xy p_max{block_xmin + block_size_, block_ymin + block_size_};
+                    point_t p_min{block_xmin, block_ymin};
+                    point_t p_max{block_xmin + block_size_, block_ymin + block_size_};
                     block.corners(p_min, p_max);
                     if (cut.containsBlock(block))
                     {
