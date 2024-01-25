@@ -13,6 +13,7 @@ namespace astay
         float_t topo_{-1}, density_{-1};
         float_t au_{-1}, ag_{-1}, cu_{-1};
         float_t tcm_{-1}, s_{-1};
+        bool status_ = false;
 
     public:
         void setType(int type)
@@ -47,6 +48,10 @@ namespace astay
         {
             s_ = s;
         }
+        void setStatus(bool status)
+        {
+            status_ = status;
+        }
         int type() const
         {
             return type_;
@@ -78,6 +83,10 @@ namespace astay
         float_t s() const
         {
             return s_;
+        }
+        bool status() const
+        {
+            return status_;
         }
         friend std::ostream &operator<<(std::ostream &o, const MiningBlock &block)
         {
