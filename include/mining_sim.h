@@ -47,42 +47,35 @@ namespace astay
         std::string svg_dir_;
         float_t xOffset_, yOffset_;
         int mb_height_{10};
-        // MiningPlan plan_;
-        // std::vector<int> row_ids_;
-        // std::vector<int> row_cuts_;
         std::vector<MiningCut> cuts_;
+        std::vector<MiningBlock> blocks_;
         std::vector<Polyline> polylines_;
         std::vector<MiningGeoPoly> geopolygons_;
-        // std::vector<std::string> row_loaders_;
         std::unordered_map<int, std::vector<int>> cut_id_by_level_;
         std::unordered_map<int, std::vector<int>> polyline_id_by_level_;
         std::unordered_map<int, std::vector<int>> geopoly_id_by_cut_id_;
+        std::unordered_map<int, std::vector<int>> block_id_by_cut_id_;
         // std::unordered_map<int, std::vector<int>> geopoly_id_by_level_;
         // std::map<int, std::vector<MiningBlock>> blocks_by_level_;
         // std::map<std::string, std::vector<MiningCut>> cuts_by_loader_;
-        /* fix coordinates for bf::model::polygon inheritance */
 
     public:
         Datatwin();
         /* Set DB parameters */
-        // void setProjectID(int project_id);
         void setDBfilepath(const std::string &filepath);
         void setModelBlockfilepath(const std::string &filepath);
         void setTopographyfilepath(const std::string &filepath);
         void setSVGDir(const std::string &filepath);
-        // void setModelBlocksDB(const std::string &db_name);
         /* Read data */
         void ReadMiningCuts(bool is_verbose = false);
         void ReadMiningGeoPolygons(bool is_verbose = false);
         void ReadTopography(bool is_verbose = false);
-        // void ReadMiningBlocks(bool is_verbose = false);
+        void ReadMiningBlocks(bool is_verbose = false);
         // void ReadPlan(bool is_verbose = false);
         /* Compute operations */
         void IntersectMiningCutsWithPolylines(bool is_verbose = false);
-        // void SortCuts(bool is_verbose = false);
-        // void ValidateDB(bool is_verbose = false);
-        // void PopulateDB(bool is_verbose = false);
         void Draw(bool is_verbose = false);
+
     private:
         template <class PolygonType>
         PolygonType ApplyOffsetToPolygon(const PolygonType &polygon, point_t &centroid)
@@ -117,6 +110,9 @@ namespace astay
         void finalizeAndStoreCut(MiningCut& cut, int level, int day);
         void finalizeAndStorePolyline(Polyline& polyline, int level);
         void finalizeAndStoreGeoPoly(MiningGeoPoly& geopoly, int level, std::string& name);
+        bool isLeftOfLine(point_t& line_a, point_t& line_b, point_t& point_c);
+        float_t distanceFromLine(point_t &line_a, point_t &line_b, point_t &point_c);
         box_t computeBoundingArea(float margin = 1.5, bool is_verbose = false);
+        linestring_t linestringFromPolyline(Polyline& polyline, point_t point_a, point_t point_b);
     };
 }
